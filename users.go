@@ -116,9 +116,9 @@ func (s *UsersService) GetByAttribute(ctx context.Context, realm, attributeName 
 	// If we are on a version that doesn't support q=attr:val syntax:
 	//
 	if ver < "20" {
-		queryUrl = fmt.Sprintf("admin/realms/%s/filter=%s=%s", realm, url.PathEscape(attributeName), url.PathEscape(value))
+		queryUrl = fmt.Sprintf("admin/realms/%s/users?filter=%s=%s", realm, url.PathEscape(attributeName), url.PathEscape(value))
 	} else {
-		queryUrl = fmt.Sprintf("admin/realms/%s/users?q=%s:%s", realm, url.PathEscape(attributeName), url.PathEscape(value))
+		queryUrl = fmt.Sprintf("admin/realms/%s/users?q=%s:%s", realm, url.PathEscape(attributeName), url.PathEscape("\""+value+"\""))
 	}
 	req, err := s.keycloak.NewRequest(http.MethodGet, queryUrl, nil)
 	if err != nil {
@@ -127,12 +127,10 @@ func (s *UsersService) GetByAttribute(ctx context.Context, realm, attributeName 
 
 	var users []*User
 	res, err := s.keycloak.Do(ctx, req, &users)
-	fmt.Println(res.Header)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	println(len(users))
 	return users, res, nil
 }
 
